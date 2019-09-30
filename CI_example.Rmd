@@ -1,0 +1,42 @@
+---
+title: "RS1_CI_example"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library}
+
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(gplots)
+library(Rmisc)
+
+```
+
+```{r data loading}
+
+setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/Straights")
+temp = list.files(pattern = c("magnitudedata", "*.csv")) # list all CSV files in the directory
+myfiles = lapply(temp, read.csv) # read these CSV in the directory
+magnitudedata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
+
+```
+
+```{r computing confidence intervals}
+
+example <- magnitudedata %>%
+  select(heading, FirstSteeringTime)
+
+
+CI_example <- summarySE(example, measurevar = "FirstSteeringTime", groupvars = c("heading"))
+
+
+ggplot(CI_example, aes(x = heading, y = FirstSteeringTime)) + 
+    geom_errorbar(aes(ymin = FirstSteeringTime-se, ymax = FirstSteeringTime + se), width=.1) +
+    geom_point()
+
+```
