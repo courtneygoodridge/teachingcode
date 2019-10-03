@@ -19,7 +19,11 @@ library(Rmisc)
 
 ```{r data loading}
 
-setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/Straights")
+# home computer working directory
+setwd("C:/Users/Courtney/Documents/PhD/Project/Experiment_code/Straights")
+
+# work computer working directory
+# setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/Straights")
 temp = list.files(pattern = c("magnitudedata", "*.csv")) # list all CSV files in the directory
 myfiles = lapply(temp, read.csv) # read these CSV in the directory
 magnitudedata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
@@ -36,6 +40,7 @@ CI_example <- summarySE(example, measurevar = "FirstSteeringTime", groupvars = c
 
 
 ggplot(CI_example, aes(x = heading, y = FirstSteeringTime)) + 
+    geom_bar(colour = "black", stat = "identity") +
     geom_errorbar(aes(ymin = FirstSteeringTime-se, ymax = FirstSteeringTime + se), width=.1) +
     geom_point()
 
