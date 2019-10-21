@@ -20,7 +20,7 @@ library(Rmisc)
 ```{r data loading}
 
 # home computer working directory
-setwd("C:/Users/Courtney/Documents/PhD/Project/Experiment_code/Straights")
+setwd("C:/Users/Courtney/Documents/PhD/Project/Experiment_code/experiment_1")
 
 # work computer working directory
 # setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/Straights")
