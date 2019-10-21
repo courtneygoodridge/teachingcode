@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r load packages}
+# rm(list = ls())
 library(ggplot2)
 library(tidyr)
 library(dplyr)
@@ -21,6 +22,9 @@ library(effsize) # for calculating effect sizes
 library(compute.es) # ancova using type 3 method
 library(multcomp) # post hoc for ancova type 3 method
 library(lmPerm)
+
+# example dataframe for stack overflow
+# dput(head(modellingdata, n = 5))
 ```
 
 ```{r loading in data}
@@ -38,7 +42,6 @@ workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV 
 
 ```{r data re-shaping, mean scores and demographics}
 
-
 workingdata <- gather(workingdata, "NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs")
 
 range(workingdata$Age)
@@ -48,5 +51,40 @@ sd(workingdata$Age)
 workingdata %>%
   group_by(condition) %>%
   summarise(mean_corrected_pairs = mean(correctpairs))
+
+```
+
+```{r checking normality of the data}
+
+ggplot(workingdata, aes(x = correctpairs)) +
+  geom_histogram(aes(y = ..density..)) +
+  stat_function(
+		fun = dnorm, 
+		args = with(workingdata, c(mean = mean(correctpairs), sd = sd(correctpairs)))) + 
+  facet_wrap( ~ condition)
+
+# need to make grouping variable a factor for levene's test - doesn't assume normality so significant means data is not normal
+leveneTest(correctpairs ~ condition, data = workingdata)
+
+```
+
+Histograms show that data seems fairly normally distributed. Levenes test comes back significant, suggesting that data is not normall distributed but it is only a minor violation.
+
+
+```{r means and anova with table output}
+
+# apa table ANOVA
+setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
+apa.1way.table(condition, correctpairs, workingdata, filename = "RS3_seminar.doc", show.conf.interval = TRUE, landscape = TRUE)
+
+result <- aov(correctpairs ~ condition, data = workingdata)
+summary(result)
+
+# Post-hoc tests (only to be used on anova1 type of anova)
+resultTukey <-TukeyHSD(result)
+resultTukey
+
+
+
 
 ```
