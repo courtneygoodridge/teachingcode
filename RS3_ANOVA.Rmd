@@ -42,14 +42,16 @@ workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV 
 
 ```{r data re-shaping, mean scores and demographics}
 
-workingdata <- gather(workingdata, "NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs")
+split_data <- workingdata %>%
+  gather("NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs") %>%
+  separate(condition, into = c("task", "presentation"))
 
-range(workingdata$Age)
+range(split_data$Age)
 mean(workingdata$Age)
 sd(workingdata$Age)
 
-workingdata %>%
-  group_by(condition) %>%
+split_data %>%
+  group_by(CT, Pres) %>%
   summarise(mean_corrected_pairs = mean(correctpairs))
 
 ```
