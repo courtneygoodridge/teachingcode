@@ -22,6 +22,7 @@ library(effsize) # for calculating effect sizes
 library(compute.es) # ancova using type 3 method
 library(multcomp) # post hoc for ancova type 3 method
 library(lmPerm)
+library(lme4)
 
 # example dataframe for stack overflow
 # dput(head(modellingdata, n = 5))
@@ -30,10 +31,10 @@ library(lmPerm)
 ```{r loading in data}
 
 # home computer working directory
-# setwd("C:/Users/Courtney/Documents/PhD/Project/Experiment_code/experiment_1")
+setwd("C:/Users/Courtney/Documents/PhD/Teaching/teachingcode")
 
 # work computer working directory
-setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
+# setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
 temp = list.files(pattern = c("DataSet_2019", "*.csv")) # list all CSV files in the directory
 myfiles = lapply(temp, read.csv) # read these CSV in the directory
 workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
@@ -77,7 +78,29 @@ Histograms show that data seems fairly normally distributed for each condition. 
 
 ```
 
-```{r means and anova with table output}
+
+```{r standard two-way anova}
+
+options(contrasts = c("contr.sum", "contr.poly")) # some documentaion says this is the correct options for type 3 sum of squares
+
+options(contrasts = c("contr.helmert", "contr.poly")) # apaTables documentation says this is the correct option for matching SPSS output
+
+standard.two.aov <- aov(correctpairs ~ task * presentation, data = split_data)
+Anova(standard.two.aov, type =3)
+summary(standard.two.aov)
+
+
+```
+
+Despite doing the same analysis, R and SPSS produce different outpout for the repeated measures ANOVA. 
+
+Type 1 sum of squares performs analyses sequentially i.e. how they appears within the model that you specify.
+
+Type 3 sum of squares performs analyses in light of other main effects and interactions.
+
+The distinction is important, because the sometimes a main effect can be generated BECAUSE of the an interaction (i.e. on factor level has a low average because of the interaction). Thus is you use type 1 or 3 in this instance, you are likely to get different results.
+
+```{r means and anova with table output in word document}
 
 # apa table ANOVA
 setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
