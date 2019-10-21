@@ -33,14 +33,14 @@ magnitudedata <- do.call(rbind.data.frame, myfiles) # convert and combine the CS
 ```{r computing confidence intervals}
 
 example <- magnitudedata %>%
-  select(heading, FirstSteeringTime)
+  dplyr::select(heading, FirstSteeringTime)
 
 
 CI_example <- summarySE(example, measurevar = "FirstSteeringTime", groupvars = c("heading"))
 
 
 ggplot(CI_example, aes(x = heading, y = FirstSteeringTime)) + 
-    geom_bar(colour = "black", stat = "identity") +
+    geom_line() +
     geom_errorbar(aes(ymin = FirstSteeringTime-se, ymax = FirstSteeringTime + se), width=.1) +
     geom_point()
 
