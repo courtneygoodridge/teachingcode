@@ -1,0 +1,52 @@
+---
+title: "RS3_ANOVA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(car) # anova and levenes table
+library(apaTables) # for apa tables
+library(MBESS) # for apa tables
+library(WRS2) # for non-parametric
+library(e1071) # for skewness calculation
+library(ggpubr) # for interaction plots/boxplots
+library(effsize) # for calculating effect sizes
+library(compute.es) # ancova using type 3 method
+library(multcomp) # post hoc for ancova type 3 method
+library(lmPerm)
+```
+
+```{r loading in data}
+
+# home computer working directory
+# setwd("C:/Users/Courtney/Documents/PhD/Project/Experiment_code/experiment_1")
+
+# work computer working directory
+setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
+temp = list.files(pattern = c("DataSet_2019", "*.csv")) # list all CSV files in the directory
+myfiles = lapply(temp, read.csv) # read these CSV in the directory
+workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
+
+```
+
+```{r data re-shaping, mean scores and demographics}
+
+
+workingdata <- gather(workingdata, "NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs")
+
+range(workingdata$Age)
+mean(workingdata$Age)
+sd(workingdata$Age)
+
+workingdata %>%
+  group_by(condition) %>%
+  summarise(mean_corrected_pairs = mean(correctpairs))
+
+```
