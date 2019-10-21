@@ -40,16 +40,28 @@ workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV 
 
 ```
 
-```{r data re-shaping, mean scores and demographics}
+```{r demographics, normality mean scores and reshaping data}
 
+ggplot(workingdata %>%
+         gather("NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs"), aes(x = correctpairs)) +
+  geom_histogram(aes(y = ..density..)) +
+  stat_function(
+		fun = dnorm, 
+		args = with(workingdata %>%
+		              gather("NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs"), c(mean = mean(correctpairs), sd = sd(correctpairs)))) + 
+  facet_wrap( ~ condition)
+
+# spliting conditions into factors and their levels
 split_data <- workingdata %>%
   gather("NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs") %>%
   separate(condition, into = c("task", "presentation"))
 
+# age demographics
 range(split_data$Age)
-mean(workingdata$Age)
-sd(workingdata$Age)
+mean(split_data$Age)
+sd(split_data$Age)
 
+# mean scores for condition
 split_data %>%
   group_by(CT, Pres) %>%
   summarise(mean_corrected_pairs = mean(correctpairs))
@@ -57,16 +69,6 @@ split_data %>%
 ```
 
 ```{r checking normality of the data}
-
-ggplot(workingdata, aes(x = correctpairs)) +
-  geom_histogram(aes(y = ..density..)) +
-  stat_function(
-		fun = dnorm, 
-		args = with(workingdata, c(mean = mean(correctpairs), sd = sd(correctpairs)))) + 
-  facet_wrap( ~ condition)
-
-# need to make grouping variable a factor for levene's test - doesn't assume normality so significant means data is not normal
-leveneTest(correctpairs ~ condition, data = workingdata)
 
 ```
 
