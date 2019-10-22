@@ -31,10 +31,10 @@ library(lme4)
 ```{r loading in data}
 
 # home computer working directory
-setwd("C:/Users/Courtney/Documents/PhD/Teaching/teachingcode")
+# setwd("C:/Users/Courtney/Documents/PhD/Teaching/teachingcode")
 
 # work computer working directory
-# setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
+setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
 temp = list.files(pattern = c("DataSet_2019", "*.csv")) # list all CSV files in the directory
 myfiles = lapply(temp, read.csv) # read these CSV in the directory
 workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
@@ -74,10 +74,29 @@ Histograms show that data seems fairly normally distributed for each condition. 
 
 ```{r checking normality of the data}
 
-# COMPUTE LEVENES TEST HERE #
+# residuals versus fitted values
+plot(standard.two.aov, 1)
+
+# levenes test
+leveneTest(correctpairs ~ task * presentation, data = split_data)
+
+# normality Q-Q plot
+plot(standard.two.aov, 2)
 
 ```
 
+Homogeneity of variance is an assumption used for t-tests and ANOVAs whereby all comparison groups have the same variance. If this is assumption is violated, it can inflate the t and f values. Homogeneity is not assumed, so significance of these tests indicates a violation. 
+
+T and F avlues are fairly robust against violations so long as the group sizes are similar. If group sizes are vastly unequal and homogeneity of variance is violated, then the F statistic will be biased when large sample variances are associated with small group sizes.  When this occurs, the significance level will be underestimated, which can cause the null hypothesis to be falsely rejected. 
+
+**Residuals versus fitted**
+Shows dependency of residuals to fitted values to see if the variance is consistent across the values. This plots indicates that this is not the case. 
+
+**Levene's test**
+Levene's test just reaches significance. However as we have equal groups within our condition, our test should be robust against this violation. 
+
+**Normality Q-Q plot**
+This plots quantiles from your residuals against quantiles from a normal distribution. A 45 degree line indicates what normality of the data would look like. As we can see, this data would look normally distributed as most points fall on the line.
 
 ```{r standard two-way anova}
 
@@ -86,8 +105,9 @@ options(contrasts = c("contr.sum", "contr.poly")) # some documentaion says this 
 options(contrasts = c("contr.helmert", "contr.poly")) # apaTables documentation says this is the correct option for matching SPSS output
 
 standard.two.aov <- aov(correctpairs ~ task * presentation, data = split_data)
-Anova(standard.two.aov, type =3)
-summary(standard.two.aov)
+
+Anova(standard.two.aov)
+
 
 
 ```
