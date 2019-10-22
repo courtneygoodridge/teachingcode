@@ -23,6 +23,8 @@ library(compute.es) # ancova using type 3 method
 library(multcomp) # post hoc for ancova type 3 method
 library(lmPerm)
 library(lme4)
+library(afex) # analysis of factorial experiments
+library(lsr) # for calculating partial eta squared
 
 # example dataframe for stack overflow
 # dput(head(modellingdata, n = 5))
@@ -106,9 +108,9 @@ options(contrasts = c("contr.helmert", "contr.poly")) # apaTables documentation 
 
 standard.two.aov <- aov(correctpairs ~ task * presentation, data = split_data)
 
-Anova(standard.two.aov)
+Anova(standard.two.aov, type = 3)
 
-
+etaSquared(standard.two.aov, type = 3, anova = TRUE)
 
 ```
 
