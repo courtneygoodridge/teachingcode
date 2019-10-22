@@ -33,10 +33,10 @@ library(lsr) # for calculating partial eta squared
 ```{r loading in data}
 
 # home computer working directory
-# setwd("C:/Users/Courtney/Documents/PhD/Teaching/teachingcode")
+setwd("C:/Users/Courtney/Documents/PhD/Teaching/teachingcode")
 
 # work computer working directory
-setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
+# setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
 temp = list.files(pattern = c("DataSet_2019", "*.csv")) # list all CSV files in the directory
 myfiles = lapply(temp, read.csv) # read these CSV in the directory
 workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
@@ -105,7 +105,11 @@ This plots quantiles from your residuals against quantiles from a normal distrib
 
 ```{r standard two-way anova}
 
-options(contrasts = c("contr.sum", "contr.poly")) # some documentaion says this is the correct options for type 3 sum of squares
+# sets our factors as a factor data type
+split_data$task <- as.factor(split_data$task)
+split_data$presentation <- as.factor(split_data$presentation)
+
+options(contrasts = c("contr.sum", "contr.poly"))
 
 standard.two.aov <- aov(correctpairs ~ task * presentation, data = split_data)
 
@@ -115,7 +119,7 @@ etaSquared(standard.two.aov, type = 3, anova = TRUE)
 
 ```
 
-Despite doing the same analysis, R and SPSS produce different outpout for the repeated measures ANOVA. 
+This repeated measures ANOVA in R sums of squares, mean square and eta squared values that are the same as SPSS and JASP. However the f value is different and I cannot understand why.
 
 Type 1 sum of squares performs analyses sequentially i.e. how they appears within the model that you specify.
 
@@ -123,31 +127,47 @@ Type 3 sum of squares performs analyses in light of other main effects and inter
 
 The distinction is important, because the sometimes a main effect can be generated BECAUSE of the an interaction (i.e. on factor level has a low average because of the interaction). Thus is you use type 1 or 3 in this instance, you are likely to get different results.
 
-The above producessums of squares, mean square and eta squared values that are the same. However the f value is different?
-
 **TO DO**
 
 - ASK ON STATS EXCHANGE: Why am I getting values that match JASP on everything except for my f value?
 - Understand why "options(contrasts = c("contr.sum", "contr.poly"))" works (check previously sent material on email) 
-- Compute interaction plots for ANOVA
-- Compute estimated margin means for main effects
-- Compute paired samples t test for investigating interaction
+- Compute interaction plots for ANOVA **done**
+- Compute estimated margin means for main effects **done**
+- Compute paired samples t test for investigating interaction **done**
 - Check values for all these tests match JASP/SPSS
+- Check how to compute effect sizes for Tukey post hoc analyses
+
+```{r interaction plot}
+
+ggplot(data = split_data, aes(x = presentation, color = task, group = task, y = correctpairs)) +
+         stat_summary(fun.y = mean, geom = "point") +
+         stat_summary(fun.y = mean, geom = "line")
+
+```
+
+Interaction plot visualises interaction i.e. a difference in differences.
+
+```{r exploring main effect and interaction}
+
+model.tables(standard.two.aov, "mean", se = TRUE)
+
+TukeyHSD(standard.two.aov)
+
+```
+
+model.tables function computes estimated marginal means for levels wihtin each main effect (they match to SPSS and JASP output). Hence this helps understand the significnat main effects
+
+TukeyHSD function compute post hoc analyses to understand the interaction. Of note are the following comparisons:
+
+**NoAS:Ver-AS:Ver**, **NoAS:VerDemo-AS:VerDemo**
+
+These demonstrate the same mean differences as the two paired samples t-tests in the SPSS output. Hence this is the equivalent in R form. Only problem now is computing effect sizes for the Tukey post hoc analyses.
+
 
 ```{r means and anova with table output in word document}
 
 # apa table ANOVA
 setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
 apa.1way.table(condition, correctpairs, workingdata, filename = "RS3_seminar.doc", show.conf.interval = TRUE, landscape = TRUE)
-
-result <- aov(correctpairs ~ condition, data = workingdata)
-summary(result)
-
-# Post-hoc tests (only to be used on anova1 type of anova)
-resultTukey <-TukeyHSD(result)
-resultTukey
-
-
-
 
 ```
