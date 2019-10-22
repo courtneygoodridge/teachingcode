@@ -45,6 +45,9 @@ workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV 
 
 ```{r demographics, normality mean scores and reshaping data}
 
+workingdata <- workingdata %>%
+  mutate(ppid = row_number())
+
 # computing histograms and normality curves for each condition
 ggplot(workingdata %>%
          gather("NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs"), aes(x = correctpairs)) +
@@ -104,8 +107,6 @@ This plots quantiles from your residuals against quantiles from a normal distrib
 
 options(contrasts = c("contr.sum", "contr.poly")) # some documentaion says this is the correct options for type 3 sum of squares
 
-options(contrasts = c("contr.helmert", "contr.poly")) # apaTables documentation says this is the correct option for matching SPSS output
-
 standard.two.aov <- aov(correctpairs ~ task * presentation, data = split_data)
 
 Anova(standard.two.aov, type = 3)
@@ -121,6 +122,17 @@ Type 1 sum of squares performs analyses sequentially i.e. how they appears withi
 Type 3 sum of squares performs analyses in light of other main effects and interactions.
 
 The distinction is important, because the sometimes a main effect can be generated BECAUSE of the an interaction (i.e. on factor level has a low average because of the interaction). Thus is you use type 1 or 3 in this instance, you are likely to get different results.
+
+The above producessums of squares, mean square and eta squared values that are the same. However the f value is different?
+
+**TO DO**
+
+- ASK ON STATS EXCHANGE: Why am I getting values that match JASP on everything except for my f value?
+- Understand why "options(contrasts = c("contr.sum", "contr.poly"))" works (check previously sent material on email) 
+- Compute interaction plots for ANOVA
+- Compute estimated margin means for main effects
+- Compute paired samples t test for investigating interaction
+- Check values for all these tests match JASP/SPSS
 
 ```{r means and anova with table output in word document}
 
