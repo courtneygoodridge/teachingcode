@@ -8,7 +8,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r load packages}
-# rm(list = ls())
+# rm(list = ls()) # clears environment
+
+library(readxl)
 library(ggplot2)
 library(tidyr)
 library(dplyr)
@@ -30,18 +32,21 @@ library(lsr) # for calculating partial eta squared
 # dput(head(modellingdata, n = 5))
 ```
 
-```{r loading in data}
+```{r loading in data as csv file}
 
 # home computer working directory
-setwd("C:/Users/Courtney/Documents/PhD/Teaching/teachingcode")
+# setwd("C:/Users/Courtney/Documents/PhD/Teaching/teachingcode")
 
 # work computer working directory
-# setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
-temp = list.files(pattern = c("DataSet_2019", "*.csv")) # list all CSV files in the directory
+setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
+
+
+temp = list.files(pattern = c("RS3_dataset", "*.csv")) # list all CSV files in the directory
 myfiles = lapply(temp, read.csv) # read these CSV in the directory
 workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
 
 ```
+
 
 ```{r demographics, normality mean scores and reshaping data}
 
@@ -136,6 +141,7 @@ The distinction is important, because the sometimes a main effect can be generat
 - Compute paired samples t test for investigating interaction **done**
 - Check values for all these tests match JASP/SPSS
 - Check how to compute effect sizes for Tukey post hoc analyses
+- Ask forum how to get correct degrees of freedom (444) but still be able to perform ANOVA (it is the difference in degrees of freedom that it making my F values differ!)
 
 ```{r interaction plot}
 
