@@ -1,31 +1,33 @@
 ---
 title: "2x2 repeated measures ANOVA with RS3 data"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The following markdown analyses data from the RS3 in R. The results (main effects, interactions and folow up t-tests) are the same as JASP.
+The following markdown analyses data from the RS3 in R. The results (main effects, interactions and follow up t-tests) are the same as JASP and SPSS.
 
 ```{r load packages, results = 'hide', message = FALSE}
 # rm(list = ls()) # clears environment
 
 library(ggplot2) # plotting interaction plots
+library(Rmisc) # for confidence intervals on the interaction plots
 library(tidyr) # manipulating dataframes
 library(dplyr) # manipulating dataframes
 library(ez) # allows me to compute repeated ANOVA that matches JASP output
 library(car) # allows me to use Anova() function to get summary of main effects and interactions
 library(sjstats) # computes partial eta squared effect size
 library(effsize) # computes cohen's D for follow up t-tests
-
+library(apaTables) # for apa tables
 ```
 
-Here I am loading the packages I'll need for the analysis. I put comment about why each one is needed. There are many ways to compute ANOVAs in R and there are many different packages you can use to do. However I have found the "ez" packages works best. I think explain down below. 
+Here I am loading the packages I'll need for the analysis. I have put a note about why each one is needed. There are many ways to compute ANOVAs in R and there are many different packages you can use to do so. However I have found that the "ez" packages works best for a repeated measures design. I explain in the following markdown. 
 
 ```{r loading in data as csv file}
-
 # work computer working directory
 setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
 
@@ -33,13 +35,11 @@ setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachin
 temp = list.files(pattern = c("RS3_dataset", "*.csv")) # list all CSV files in the directory
 myfiles = lapply(temp, read.csv) # read these CSV in the directory
 workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
-
 ```
 
 Here I am grabbing the data from my working directory
 
 ```{r descriptive statistics}
-
 # Here I'm generating a participant ID, this will be important later
 workingdata <- workingdata %>%
   mutate(ppid = row_number())
@@ -58,7 +58,6 @@ ggplot(workingdata %>%
 range(workingdata$Age)
 mean(workingdata$Age)
 sd(workingdata$Age)
-
 ```
 
 Firstly I'm creating a new variable "ppid" to indicate the participant number. This will be important when the ANOVA in R attempts to calculate the degrees of freedom. 
@@ -66,7 +65,6 @@ Firstly I'm creating a new variable "ppid" to indicate the participant number. T
 Histograms are plotted with normal distributions to show how the data is distributed. In this case, things seem fairly normally distributed.
 
 ```{r manipulating dataframe}
-
 # spliting conditions into factors and their levels
 split_data <- workingdata %>%
   gather("NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs") %>%
@@ -79,78 +77,88 @@ tail(split_data, n = 5)
 split_data$task <- as.factor(split_data$task)
 split_data$presentation <- as.factor(split_data$presentation)
 split_data$ppid <- as.factor(split_data$ppid)
-
 ```
 
-In JASP, each column represents a condition. In R, I need the columns to refer to the different factors, with each row being an observation. Hence I use the gather function to create a condition and value column. I then use the separate function to seperate the conditions into "task" and "presentation". The head and tail function demonstrate what this data frame looks like now.
+In JASP, each column represents a condition. In R, I need the columns to refer to the different factors, with each row being an observation. I use the gather function to create a condition and value column. I then use the separate function to seperate the conditions into "task" and "presentation". The head and tail function demonstrate what this data frame looks like now.
 
-I then ensure the factors in this design are set to the factor data types.
+I then ensure the factors in this design are set to factor data types.
 
 ```{r running the ANOVA the WRONG way}
-
 # running the ANOVA this way generates the wrong f values and sums of squares
 result_wrong <- aov(correctpairs ~ task * presentation, data = split_data)
 Anova(result_wrong, type = 3)
-
 ```
 
-This is how I first tried to run the ANOVA. However as you can see, the sum of squares, f values and degrees of freedom (DF) are wrong (despite using type 3 sum of squares like JASP). After many nights of searching, i realised the problem is the DFs.
+This is how I first tried to run the ANOVA. However as you can see, the sum of squares, f values and degrees of freedom (DF) do not match JASP and SPSS output (despite using type 3 sum of squares). After many nights of searching, I realised the problem is the DFs.
 
-```{r number of rows = DFs}
+```{r number of rows are be equal to the DFs}
 nrow(split_data)
 ```
 
-The DFs are the number of observations that are allowed to vary in the statistical calculation calculated as the N - 1. However because we have arranged the dataframe so that each column is a factor, our dataframe is telling the ANOVA that we 1780 observations. We actually have 445 (the number of participants).
+The DFs are the number of observations that are allowed to vary in the statistical calculation and are calculated as the N - 1. However because I have arranged the dataframe so that each column is a factor, the dataframe is telling the ANOVA that I have 1780 observations. I actually have 445 (the number of participants).
 
 ```{r running the ANOVA the RIGHT way}
-
 # running the ANOVA this way generates the correc f values and sum of sqaures
 result_correct <- ezANOVA(split_data, dv = correctpairs, wid = ppid, within = .(task, presentation), type = 3, detailed = TRUE, return_aov = TRUE)
 result_correct
-
-# effect sizes for the correct ANOVA method
-eta_sq(result$aov, partial = TRUE)
-
 ```
 
-If we use the ezANOVA function, we can specify the number of cases we actually have with the "wid" arugument. We assign this the ppid variable made earlier. This means that the DFs can be correctly calculated, and now the sum of squares (SSn), F value and DFs match the JASP output.
+If I use the ezANOVA function, I can specify the number of cases I actually have with the "wid" arugument. I assign this the ppid variable made earlier. This means that the DFs can be correctly calculated, and now the sum of squares (SSn), F value and DFs match the JASP and SPSS output.
 
+Importantly, I input "return_aov = TRUE". This is important for the effect sizes.
 
+```{r effect size}
+# effect sizes for the correct ANOVA method
+eta_sq(result_correct$aov, partial = TRUE)
+```
+
+The effect size function only takes "aov" objects. Because I returned an "aov" object from the ezANOVA, I can use this to calculate the effect size. 
+
+```{r estimated marginal means for the main effects}
+model.tables(result_correct$aov, "mean", se = TRUE)
+```
+
+I then also use the "aov" object from the ezANOVA to calculate the estimated marginal means for the main effects. Again, these match the ones from the SPSS output.
 
 ```{r interaction plot}
+# computes standard error and 95% confidence intervals
+CIerror_bar <- summarySE(split_data, measurevar = "correctpairs", groupvars = c("task", "presentation"))
 
-ggplot(data = split_data, aes(x = presentation, color = task, group = task, y = correctpairs)) +
+ggplot(data = CIerror_bar, aes(x = presentation, color = task, group = task, y = correctpairs)) +
          stat_summary(fun.y = mean, geom = "point") +
-         stat_summary(fun.y = mean, geom = "line")
-
+         stat_summary(fun.y = mean, geom = "line") +
+  geom_errorbar(aes(ymin = correctpairs - se, ymax = correctpairs + se), width = .1)
 ```
 
-Interaction plot visualises interaction i.e. a difference in differences.
+Here I have an interaction plot that visualises the interaction. I have also plotted 95% confidence intervals around each mean.
 
-```{r exploring main effect and interaction}
+```{r follow up paired sample t tests}
+workingdata <- split_data %>%
+  unite("condition", task, presentation, sep = "_") %>%
+  spread(condition, correctpairs)
+```
 
-model.tables(result$aov, "mean", se = TRUE)
+To compute the t-tests, I re-order the dataframe so that each condition is a column.
 
-# TukeyHSD(standard.two.aov)
-
+```{r t-tests and effect sizes}
+# t-test and effect size for AS and no AS in the verbal condition
 t.test(workingdata$NoAS_Ver, workingdata$AS_Ver, paired = TRUE)
-cohen.d(workingdata$NoAS_Ver, workingdata$AS_Ver)
+cohen.d(workingdata$NoAS_Ver, workingdata$AS_Ver, paired = TRUE)
 
+# t-test and effect size for AS and no AS in the verbal condition
+t.test(workingdata$NoAS_VerDemo, workingdata$AS_VerDemo, paired = TRUE)
+cohen.d(workingdata$NoAS_VerDemo, workingdata$AS_VerDemo, paired = TRUE)
 ```
 
-model.tables function computes estimated marginal means for levels wihtin each main effect (they match to SPSS and JASP output). Hence this helps understand the significnat main effects
-
-TukeyHSD function compute post hoc analyses to understand the interaction. Of note are the following comparisons:
-
-**NoAS:Ver-AS:Ver**, **NoAS:VerDemo-AS:VerDemo**
-
-These demonstrate the same mean differences as the two paired samples t-tests in the SPSS output. Hence this is the equivalent in R form. Only problem now is computing effect sizes for the Tukey post hoc analyses.
-
+I can then compute t-tests and cohen's D effect sizes for AS and no AS in the verbal and and verbal + demo presentation factor levels.
 
 ```{r means and anova with table output in word document}
+setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
 
-# apa table ANOVA
-# setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
-# apa.1way.table(condition, correctpairs, workingdata, filename = "RS3_seminar.doc", show.conf.interval = TRUE, landscape = TRUE)
+apa.2way.table(presentation, task, correctpairs, data = split_data, filename = "anova_means_table.doc", table.number = 1,
+  show.conf.interval = TRUE, show.marginal.means = TRUE)
 
+apa.ezANOVA.table(result_correct, table.title = "Within subjects effects", table.number = 2, filename = "anova_table.doc")
 ```
+
+Finally, a nice little touch. The apaTables package allows me to save the mean and SDs from the conditions and the ANOVA tables as an APA formatted table in a word document. The package also includes functions that do this for over tests such as regressions and one-way ANOVAs.
