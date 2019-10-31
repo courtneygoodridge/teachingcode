@@ -15,12 +15,14 @@ The following markdown analyses data from the RS3 in R. The results (main effect
 library(ggplot2) # plotting interaction plots
 library(tidyr) # manipulating dataframes
 library(dplyr) # manipulating dataframes
-library(sjstats) # computes partial eta squared effect size
 library(ez) # allows me to compute repeated ANOVA that matches JASP output
+library(car) # allows me to use Anova() function to get summary of main effects and interactions
+library(sjstats) # computes partial eta squared effect size
+library(effsize) # computes cohen's D for follow up t-tests
 
 ```
 
-Here I am loading the packages I'll need for the following analyses. I have commented why each one i necessary. There are loads of ways to compute ANOVAs in R and there are many different packages, but these worked for this analysis
+Here I am loading the packages I'll need for the analysis. I put comment about why each one is needed. There are many ways to compute ANOVAs in R and there are many different packages you can use to do. However I have found the "ez" packages works best. I think explain down below. 
 
 ```{r loading in data as csv file}
 
@@ -34,10 +36,11 @@ workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV 
 
 ```
 
-Here I am
+Here I am grabbing the data from my working directory
 
-```{r demographics, normality mean scores and reshaping data}
+```{r descriptive statistics}
 
+# Here I'm generating a participant ID, this will be important later
 workingdata <- workingdata %>%
   mutate(ppid = row_number())
 
@@ -51,59 +54,68 @@ ggplot(workingdata %>%
 		              gather("NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs"), c(mean = mean(correctpairs), sd = sd(correctpairs)))) + 
   facet_wrap( ~ condition)
 
+# descriptives for age
+range(workingdata$Age)
+mean(workingdata$Age)
+sd(workingdata$Age)
+
+```
+
+Firstly I'm creating a new variable "ppid" to indicate the participant number. This will be important when the ANOVA in R attempts to calculate the degrees of freedom. 
+
+Histograms are plotted with normal distributions to show how the data is distributed. In this case, things seem fairly normally distributed.
+
+```{r manipulating dataframe}
+
 # spliting conditions into factors and their levels
 split_data <- workingdata %>%
   gather("NoAS_Ver", "NoAS_VerDemo", "AS_Ver", "AS_VerDemo", key = "condition", value = "correctpairs") %>%
   separate(condition, into = c("task", "presentation"))
 
-# age demographics
-range(split_data$Age)
-mean(split_data$Age)
-sd(split_data$Age)
-
-# mean scores for condition
-split_data %>%
-  group_by(task, presentation) %>%
-  summarise(mean_corrected_pairs = mean(correctpairs))
-
-```
-
-Histograms show that data seems fairly normally distributed for each condition. Mean values for each condition show differences. 
-
-```{r performing two-way anova}
+head(split_data, n = 5)
+tail(split_data, n = 5)
 
 # sets our factors as a factor data types
 split_data$task <- as.factor(split_data$task)
 split_data$presentation <- as.factor(split_data$presentation)
-
-library(ez)
-result <- ezANOVA(split_data, dv = correctpairs, wid = ppid, within = .(task, presentation), type = 3, detailed = TRUE, return_aov = TRUE)
-
-library(sjstats)
-eta_sq(result$aov, partial = TRUE)
-
-# TukeyHSD(result$aov)
+split_data$ppid <- as.factor(split_data$ppid)
 
 ```
 
-This repeated measures ANOVA in R sums of squares, mean square and eta squared values that are the same as SPSS and JASP. However the f value is different and I cannot understand why.
+In JASP, each column represents a condition. In R, I need the columns to refer to the different factors, with each row being an observation. Hence I use the gather function to create a condition and value column. I then use the separate function to seperate the conditions into "task" and "presentation". The head and tail function demonstrate what this data frame looks like now.
 
-Type 1 sum of squares performs analyses sequentially i.e. how they appears within the model that you specify.
+I then ensure the factors in this design are set to the factor data types.
 
-Type 3 sum of squares performs analyses in light of other main effects and interactions.
+```{r running the ANOVA the WRONG way}
 
-The distinction is important, because the sometimes a main effect can be generated BECAUSE of the an interaction (i.e. one factor level has a low average because of the interaction). Thus is you use type 1 or 3 in this instance, you are likely to get different results.
+# running the ANOVA this way generates the wrong f values and sums of squares
+result_wrong <- aov(correctpairs ~ task * presentation, data = split_data)
+Anova(result_wrong, type = 3)
 
-**TO DO**
+```
 
-- ASK ON STATS EXCHANGE: Why am I getting values that match JASP on everything except for my f value?
-- Understand why "options(contrasts = c("contr.sum", "contr.poly"))" works (check previously sent material on email) 
-- Compute interaction plots for ANOVA **done**
-- Compute estimated margin means for main effects **done**
-- Compute paired samples t test for investigating interaction **done**
-- Check values for all these tests match JASP/SPSS
-- Check how to compute effect sizes for Tukey post hoc analyses
-- Ask forum how to get correct degrees of freedom (444) but still be able to perform ANOVA (it is the difference in degrees of freedom that it making my F values differ!) **done**
+This is how I first tried to run the ANOVA. However as you can see, the sum of squares, f values and degrees of freedom (DF) are wrong (despite using type 3 sum of squares like JASP). After many nights of searching, i realised the problem is the DFs.
+
+```{r number of rows = DFs}
+nrow(split_data)
+```
+
+The DFs are the number of observations that are allowed to vary in the statistical calculation calculated as the N - 1. However because we have arranged the dataframe so that each column is a factor, our dataframe is telling the ANOVA that we 1780 observations. We actually have 445 (the number of participants).
+
+```{r running the ANOVA the RIGHT way}
+
+# running the ANOVA this way generates the correc f values and sum of sqaures
+result_correct <- ezANOVA(split_data, dv = correctpairs, wid = ppid, within = .(task, presentation), type = 3, detailed = TRUE, return_aov = TRUE)
+result_correct
+
+# effect sizes for the correct ANOVA method
+eta_sq(result$aov, partial = TRUE)
+
+```
+
+If we use the ezANOVA function, we can specify the number of cases we actually have with the "wid" arugument. We assign this the ppid variable made earlier. This means that the DFs can be correctly calculated, and now the sum of squares (SSn), F value and DFs match the JASP output.
+
+
 
 ```{r interaction plot}
 
