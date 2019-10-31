@@ -1,5 +1,5 @@
 ---
-title: "RS3_ANOVA"
+title: "2x2 repeated measures ANOVA with RS3 data"
 output: html_document
 ---
 
@@ -7,46 +7,34 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r load packages}
+The following markdown analyses data from the RS3 in R. The results (main effects, interactions and folow up t-tests) are the same as JASP.
+
+```{r load packages, results = 'hide', message = FALSE}
 # rm(list = ls()) # clears environment
 
-library(readxl)
-library(ggplot2)
-library(tidyr)
-library(dplyr)
-library(car) # anova and levenes table
-library(apaTables) # for apa tables
-library(MBESS) # for apa tables
-library(WRS2) # for non-parametric
-library(e1071) # for skewness calculation
-library(ggpubr) # for interaction plots/boxplots
-library(effsize) # for calculating effect sizes
-library(compute.es) # ancova using type 3 method
-library(multcomp) # post hoc for ancova type 3 method
-library(lmPerm)
-library(lme4)
-library(afex) # analysis of factorial experiments
-library(lsr) # for calculating partial eta squared
+library(ggplot2) # plotting interaction plots
+library(tidyr) # manipulating dataframes
+library(dplyr) # manipulating dataframes
+library(sjstats) # computes partial eta squared effect size
+library(ez) # allows me to compute repeated ANOVA that matches JASP output
 
-# example dataframe for stack overflow
-# dput(head(modellingdata, n = 5))
 ```
 
-```{r loading in data as csv file}
+Here I am loading the packages I'll need for the following analyses. I have commented why each one i necessary. There are loads of ways to compute ANOVAs in R and there are many different packages, but these worked for this analysis
 
-# home computer working directory
-# setwd("C:/Users/Courtney/Documents/PhD/Teaching/teachingcode")
+```{r loading in data as csv file}
 
 # work computer working directory
 setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
 
-
+# load datset
 temp = list.files(pattern = c("RS3_dataset", "*.csv")) # list all CSV files in the directory
 myfiles = lapply(temp, read.csv) # read these CSV in the directory
 workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV files into dataframe
 
 ```
 
+Here I am
 
 ```{r demographics, normality mean scores and reshaping data}
 
@@ -82,45 +70,19 @@ split_data %>%
 
 Histograms show that data seems fairly normally distributed for each condition. Mean values for each condition show differences. 
 
-```{r checking normality of the data}
+```{r performing two-way anova}
 
-# residuals versus fitted values
-plot(standard.two.aov, 1)
-
-# levenes test
-leveneTest(correctpairs ~ task * presentation, data = split_data)
-
-# normality Q-Q plot
-plot(standard.two.aov, 2)
-
-```
-
-Homogeneity of variance is an assumption used for t-tests and ANOVAs whereby all comparison groups have the same variance. If this is assumption is violated, it can inflate the t and f values. Homogeneity is not assumed, so significance of these tests indicates a violation. 
-
-T and F avlues are fairly robust against violations so long as the group sizes are similar. If group sizes are vastly unequal and homogeneity of variance is violated, then the F statistic will be biased when large sample variances are associated with small group sizes.  When this occurs, the significance level will be underestimated, which can cause the null hypothesis to be falsely rejected. 
-
-**Residuals versus fitted**
-Shows dependency of residuals to fitted values to see if the variance is consistent across the values. This plots indicates that this is not the case. 
-
-**Levene's test**
-Levene's test just reaches significance. However as we have equal groups within our condition, our test should be robust against this violation. 
-
-**Normality Q-Q plot**
-This plots quantiles from your residuals against quantiles from a normal distribution. A 45 degree line indicates what normality of the data would look like. As we can see, this data would look normally distributed as most points fall on the line.
-
-```{r standard two-way anova}
-
-# sets our factors as a factor data type
+# sets our factors as a factor data types
 split_data$task <- as.factor(split_data$task)
 split_data$presentation <- as.factor(split_data$presentation)
 
-options(contrasts = c("contr.sum", "contr.poly"))
+library(ez)
+result <- ezANOVA(split_data, dv = correctpairs, wid = ppid, within = .(task, presentation), type = 3, detailed = TRUE, return_aov = TRUE)
 
-standard.two.aov <- aov(correctpairs ~ task * presentation, data = split_data)
+library(sjstats)
+eta_sq(result$aov, partial = TRUE)
 
-Anova(standard.two.aov, type = 3)
-
-etaSquared(standard.two.aov, type = 3, anova = TRUE)
+# TukeyHSD(result$aov)
 
 ```
 
@@ -130,7 +92,7 @@ Type 1 sum of squares performs analyses sequentially i.e. how they appears withi
 
 Type 3 sum of squares performs analyses in light of other main effects and interactions.
 
-The distinction is important, because the sometimes a main effect can be generated BECAUSE of the an interaction (i.e. on factor level has a low average because of the interaction). Thus is you use type 1 or 3 in this instance, you are likely to get different results.
+The distinction is important, because the sometimes a main effect can be generated BECAUSE of the an interaction (i.e. one factor level has a low average because of the interaction). Thus is you use type 1 or 3 in this instance, you are likely to get different results.
 
 **TO DO**
 
@@ -141,7 +103,7 @@ The distinction is important, because the sometimes a main effect can be generat
 - Compute paired samples t test for investigating interaction **done**
 - Check values for all these tests match JASP/SPSS
 - Check how to compute effect sizes for Tukey post hoc analyses
-- Ask forum how to get correct degrees of freedom (444) but still be able to perform ANOVA (it is the difference in degrees of freedom that it making my F values differ!)
+- Ask forum how to get correct degrees of freedom (444) but still be able to perform ANOVA (it is the difference in degrees of freedom that it making my F values differ!) **done**
 
 ```{r interaction plot}
 
@@ -155,9 +117,12 @@ Interaction plot visualises interaction i.e. a difference in differences.
 
 ```{r exploring main effect and interaction}
 
-model.tables(standard.two.aov, "mean", se = TRUE)
+model.tables(result$aov, "mean", se = TRUE)
 
-TukeyHSD(standard.two.aov)
+# TukeyHSD(standard.two.aov)
+
+t.test(workingdata$NoAS_Ver, workingdata$AS_Ver, paired = TRUE)
+cohen.d(workingdata$NoAS_Ver, workingdata$AS_Ver)
 
 ```
 
@@ -173,7 +138,7 @@ These demonstrate the same mean differences as the two paired samples t-tests in
 ```{r means and anova with table output in word document}
 
 # apa table ANOVA
-setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
-apa.1way.table(condition, correctpairs, workingdata, filename = "RS3_seminar.doc", show.conf.interval = TRUE, landscape = TRUE)
+# setwd("C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode")
+# apa.1way.table(condition, correctpairs, workingdata, filename = "RS3_seminar.doc", show.conf.interval = TRUE, landscape = TRUE)
 
 ```
