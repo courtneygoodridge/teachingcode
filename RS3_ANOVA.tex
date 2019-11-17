@@ -1,0 +1,634 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={2x2 repeated measures ANOVA with RS3 data},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{2x2 repeated measures ANOVA with RS3 data}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+\maketitle
+
+The following markdown analyses data from the RS3 in R. The results
+(main effects, interactions and follow up t-tests) are the same as JASP
+and SPSS.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# rm(list = ls()) # clears environment}
+
+\KeywordTok{library}\NormalTok{(ggplot2) }\CommentTok{# plotting interaction plots}
+\KeywordTok{library}\NormalTok{(Rmisc) }\CommentTok{# for confidence intervals on the interaction plots}
+\KeywordTok{library}\NormalTok{(tidyr) }\CommentTok{# manipulating dataframes}
+\KeywordTok{library}\NormalTok{(dplyr) }\CommentTok{# manipulating dataframes}
+\KeywordTok{library}\NormalTok{(ez) }\CommentTok{# allows me to compute repeated ANOVA that matches JASP output}
+\KeywordTok{library}\NormalTok{(car) }\CommentTok{# allows me to use Anova() function to get summary of main effects and interactions}
+\KeywordTok{library}\NormalTok{(sjstats) }\CommentTok{# computes partial eta squared effect size}
+\KeywordTok{library}\NormalTok{(effsize) }\CommentTok{# computes cohen's D for follow up t-tests}
+\KeywordTok{library}\NormalTok{(apaTables) }\CommentTok{# for apa tables}
+\end{Highlighting}
+\end{Shaded}
+
+Here I am loading the packages I'll need for the analysis. I have put a
+note about why each one is needed. There are many ways to compute ANOVAs
+in R and there are many different packages you can use to do so. However
+I have found that the ``ez'' packages works best for a repeated measures
+design. I explain in the following markdown.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# work computer working directory}
+\KeywordTok{setwd}\NormalTok{(}\StringTok{"C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode"}\NormalTok{)}
+
+\CommentTok{# load datset}
+\NormalTok{temp =}\StringTok{ }\KeywordTok{list.files}\NormalTok{(}\DataTypeTok{pattern =} \KeywordTok{c}\NormalTok{(}\StringTok{"RS3_dataset"}\NormalTok{, }\StringTok{"*.csv"}\NormalTok{)) }\CommentTok{# list all CSV files in the directory}
+\NormalTok{myfiles =}\StringTok{ }\KeywordTok{lapply}\NormalTok{(temp, read.csv) }\CommentTok{# read these CSV in the directory}
+\NormalTok{workingdata <-}\StringTok{ }\KeywordTok{do.call}\NormalTok{(rbind.data.frame, myfiles) }\CommentTok{# convert and combine the CSV files into dataframe}
+\end{Highlighting}
+\end{Shaded}
+
+Here I am grabbing the data from my working directory
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Here I'm generating a participant ID, this will be important later}
+\NormalTok{workingdata <-}\StringTok{ }\NormalTok{workingdata }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{ppid =} \KeywordTok{row_number}\NormalTok{())}
+
+\CommentTok{# computing histograms and normality curves for each condition}
+\KeywordTok{ggplot}\NormalTok{(workingdata }\OperatorTok{%>%}
+\StringTok{         }\KeywordTok{gather}\NormalTok{(}\StringTok{"NoAS_Ver"}\NormalTok{, }\StringTok{"NoAS_VerDemo"}\NormalTok{, }\StringTok{"AS_Ver"}\NormalTok{, }\StringTok{"AS_VerDemo"}\NormalTok{, }\DataTypeTok{key =} \StringTok{"condition"}\NormalTok{, }\DataTypeTok{value =} \StringTok{"correctpairs"}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ correctpairs)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ ..density..)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_function}\NormalTok{(}
+        \DataTypeTok{fun =}\NormalTok{ dnorm, }
+        \DataTypeTok{args =} \KeywordTok{with}\NormalTok{(workingdata }\OperatorTok{%>%}
+\StringTok{                      }\KeywordTok{gather}\NormalTok{(}\StringTok{"NoAS_Ver"}\NormalTok{, }\StringTok{"NoAS_VerDemo"}\NormalTok{, }\StringTok{"AS_Ver"}\NormalTok{, }\StringTok{"AS_VerDemo"}\NormalTok{, }\DataTypeTok{key =} \StringTok{"condition"}\NormalTok{, }\DataTypeTok{value =} \StringTok{"correctpairs"}\NormalTok{), }\KeywordTok{c}\NormalTok{(}\DataTypeTok{mean =} \KeywordTok{mean}\NormalTok{(correctpairs), }\DataTypeTok{sd =} \KeywordTok{sd}\NormalTok{(correctpairs)))) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{( }\OperatorTok{~}\StringTok{ }\NormalTok{condition)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\includegraphics{RS3_ANOVA_files/figure-latex/descriptive statistics-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# descriptives for age}
+\KeywordTok{range}\NormalTok{(workingdata}\OperatorTok{$}\NormalTok{Age)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 18 35
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{mean}\NormalTok{(workingdata}\OperatorTok{$}\NormalTok{Age)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 19.92584
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sd}\NormalTok{(workingdata}\OperatorTok{$}\NormalTok{Age)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.886744
+\end{verbatim}
+
+Firstly I'm creating a new variable ``ppid'' to indicate the participant
+number. This will be important when the ANOVA in R attempts to calculate
+the degrees of freedom.
+
+Histograms are plotted with normal distributions to show how the data is
+distributed. In this case, things seem fairly normally distributed.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# spliting conditions into factors and their levels}
+\NormalTok{split_data <-}\StringTok{ }\NormalTok{workingdata }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{gather}\NormalTok{(}\StringTok{"NoAS_Ver"}\NormalTok{, }\StringTok{"NoAS_VerDemo"}\NormalTok{, }\StringTok{"AS_Ver"}\NormalTok{, }\StringTok{"AS_VerDemo"}\NormalTok{, }\DataTypeTok{key =} \StringTok{"condition"}\NormalTok{, }\DataTypeTok{value =} \StringTok{"correctpairs"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{separate}\NormalTok{(condition, }\DataTypeTok{into =} \KeywordTok{c}\NormalTok{(}\StringTok{"task"}\NormalTok{, }\StringTok{"presentation"}\NormalTok{))}
+
+\KeywordTok{head}\NormalTok{(split_data, }\DataTypeTok{n =} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   Age Gender ppid task presentation correctpairs
+## 1  20      1    1 NoAS          Ver        2.125
+## 2  20      2    2 NoAS          Ver        3.250
+## 3  20      2    3 NoAS          Ver        1.875
+## 4  19      1    4 NoAS          Ver        2.625
+## 5  19      2    5 NoAS          Ver        3.000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tail}\NormalTok{(split_data, }\DataTypeTok{n =} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      Age Gender ppid task presentation correctpairs
+## 1776  19      1  441   AS      VerDemo        3.125
+## 1777  19      2  442   AS      VerDemo        2.120
+## 1778  19      2  443   AS      VerDemo        1.500
+## 1779  19      2  444   AS      VerDemo        3.125
+## 1780  22      1  445   AS      VerDemo        3.380
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# sets our factors as a factor data types}
+\NormalTok{split_data}\OperatorTok{$}\NormalTok{task <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(split_data}\OperatorTok{$}\NormalTok{task)}
+\NormalTok{split_data}\OperatorTok{$}\NormalTok{presentation <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(split_data}\OperatorTok{$}\NormalTok{presentation)}
+\NormalTok{split_data}\OperatorTok{$}\NormalTok{ppid <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(split_data}\OperatorTok{$}\NormalTok{ppid)}
+\end{Highlighting}
+\end{Shaded}
+
+In JASP, each column represents a condition. In R, I need the columns to
+refer to the different factors, with each row being an observation. I
+use the gather function to create a condition and value column. I then
+use the separate function to seperate the conditions into ``task'' and
+``presentation''. The head and tail function demonstrate what this data
+frame looks like now.
+
+I then ensure the factors in this design are set to factor data types.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# running the ANOVA this way generates the wrong f values and sums of squares}
+\NormalTok{result_wrong <-}\StringTok{ }\KeywordTok{aov}\NormalTok{(correctpairs }\OperatorTok{~}\StringTok{ }\NormalTok{task }\OperatorTok{*}\StringTok{ }\NormalTok{presentation, }\DataTypeTok{data =}\NormalTok{ split_data)}
+\KeywordTok{Anova}\NormalTok{(result_wrong, }\DataTypeTok{type =} \DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Anova Table (Type III tests)
+## 
+## Response: correctpairs
+##                    Sum Sq   Df  F value    Pr(>F)    
+## (Intercept)       1892.71    1 5867.679 < 2.2e-16 ***
+## task                80.72    1  250.241 < 2.2e-16 ***
+## presentation       107.40    1  332.945 < 2.2e-16 ***
+## task:presentation   18.50    1   57.343 5.852e-14 ***
+## Residuals          572.88 1776                       
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+This is how I first tried to run the ANOVA. However as you can see, the
+sum of squares, f values and degrees of freedom (DF) do not match JASP
+and SPSS output (despite using type 3 sum of squares). After many nights
+of searching, I realised the problem is the DFs.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{nrow}\NormalTok{(split_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1780
+\end{verbatim}
+
+The DFs are the number of observations that are allowed to vary in the
+statistical calculation and are calculated as the N - 1. However because
+I have arranged the dataframe so that each column is a factor, the
+dataframe is telling the ANOVA that I have 1780 observations. I actually
+have 445 (the number of participants).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# running the ANOVA this way generates the correc f values and sum of sqaures}
+\NormalTok{result_correct <-}\StringTok{ }\KeywordTok{ezANOVA}\NormalTok{(split_data, }\DataTypeTok{dv =}\NormalTok{ correctpairs, }\DataTypeTok{wid =}\NormalTok{ ppid, }\DataTypeTok{within =}\NormalTok{ .(task, presentation), }\DataTypeTok{type =} \DecValTok{3}\NormalTok{, }\DataTypeTok{detailed =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{return_aov =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{result_correct}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $ANOVA
+##              Effect DFn DFd         SSn       SSd           F            p
+## 1       (Intercept)   1 444 12115.72639 287.90366 18684.66151 0.000000e+00
+## 2              task   1 444    70.64509  99.96981   313.75889 1.703071e-53
+## 3      presentation   1 444   107.22704  84.41543   563.98226 4.527024e-81
+## 4 task:presentation   1 444    18.49669 100.58709    81.64596 5.038954e-18
+##   p<.05        ges
+## 1     * 0.95485113
+## 2     * 0.10977898
+## 3     * 0.15766294
+## 4     * 0.03127755
+## 
+## $aov
+## 
+## Call:
+## aov(formula = formula(aov_formula), data = data)
+## 
+## Grand Mean: 2.608944
+## 
+## Stratum 1: ppid
+## 
+## Terms:
+##                 Residuals
+## Sum of Squares   287.9037
+## Deg. of Freedom       444
+## 
+## Residual standard error: 0.8052526
+## 
+## Stratum 2: ppid:task
+## 
+## Terms:
+##                     task Residuals
+## Sum of Squares  70.64509  99.96981
+## Deg. of Freedom        1       444
+## 
+## Residual standard error: 0.4745074
+## 1 out of 2 effects not estimable
+## Estimated effects are balanced
+## 
+## Stratum 3: ppid:presentation
+## 
+## Terms:
+##                 presentation Residuals
+## Sum of Squares     107.22704  84.41543
+## Deg. of Freedom            1       444
+## 
+## Residual standard error: 0.4360331
+## 1 out of 2 effects not estimable
+## Estimated effects are balanced
+## 
+## Stratum 4: ppid:task:presentation
+## 
+## Terms:
+##                 task:presentation Residuals
+## Sum of Squares           18.49669 100.58709
+## Deg. of Freedom                 1       444
+## 
+## Residual standard error: 0.4759701
+## Estimated effects are balanced
+\end{verbatim}
+
+If I use the ezANOVA function, I can specify the number of cases I
+actually have with the ``wid'' arugument. I assign this the ppid
+variable made earlier. This means that the DFs can be correctly
+calculated, and now the sum of squares (SSn), F value and DFs match the
+JASP and SPSS output.
+
+Importantly, I input ``return\_aov = TRUE''. This is important for the
+effect sizes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# effect sizes for the correct ANOVA method}
+\KeywordTok{eta_sq}\NormalTok{(result_correct}\OperatorTok{$}\NormalTok{aov, }\DataTypeTok{partial =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                term partial.etasq                stratum
+## 1         Residuals         0.741                   ppid
+## 2              task         0.413              ppid:task
+## 3         Residuals         0.498              ppid:task
+## 4      presentation         0.516      ppid:presentation
+## 5         Residuals         0.456      ppid:presentation
+## 6 task:presentation         0.155 ppid:task:presentation
+\end{verbatim}
+
+The effect size function only takes ``aov'' objects. Because I returned
+an ``aov'' object from the ezANOVA, I can use this to calculate the
+effect size.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{model.tables}\NormalTok{(result_correct}\OperatorTok{$}\NormalTok{aov, }\StringTok{"mean"}\NormalTok{, }\DataTypeTok{se =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in model.tables.aovlist(result_correct$aov, "mean", se = TRUE): SEs
+## for type 'means' are not yet implemented
+\end{verbatim}
+
+\begin{verbatim}
+## Tables of means
+## Grand mean
+##          
+## 2.608944 
+## 
+##  task 
+## task
+##     AS   NoAS 
+## 2.4097 2.8082 
+## 
+##  presentation 
+## presentation
+##     Ver VerDemo 
+##  2.3635  2.8544 
+## 
+##  task:presentation 
+##       presentation
+## task   Ver    VerDemo
+##   AS   2.0623 2.7571 
+##   NoAS 2.6647 2.9517
+\end{verbatim}
+
+I then also use the ``aov'' object from the ezANOVA to calculate the
+estimated marginal means for the main effects. Again, these match the
+ones from the SPSS output.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# computes standard error and 95% confidence intervals}
+\NormalTok{CIerror_bar <-}\StringTok{ }\KeywordTok{summarySE}\NormalTok{(split_data, }\DataTypeTok{measurevar =} \StringTok{"correctpairs"}\NormalTok{, }\DataTypeTok{groupvars =} \KeywordTok{c}\NormalTok{(}\StringTok{"task"}\NormalTok{, }\StringTok{"presentation"}\NormalTok{))}
+
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ CIerror_bar, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ presentation, }\DataTypeTok{color =}\NormalTok{ task, }\DataTypeTok{group =}\NormalTok{ task, }\DataTypeTok{y =}\NormalTok{ correctpairs)) }\OperatorTok{+}
+\StringTok{         }\KeywordTok{stat_summary}\NormalTok{(}\DataTypeTok{fun.y =}\NormalTok{ mean, }\DataTypeTok{geom =} \StringTok{"point"}\NormalTok{) }\OperatorTok{+}
+\StringTok{         }\KeywordTok{stat_summary}\NormalTok{(}\DataTypeTok{fun.y =}\NormalTok{ mean, }\DataTypeTok{geom =} \StringTok{"line"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_errorbar}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{ymin =}\NormalTok{ correctpairs }\OperatorTok{-}\StringTok{ }\NormalTok{se, }\DataTypeTok{ymax =}\NormalTok{ correctpairs }\OperatorTok{+}\StringTok{ }\NormalTok{se), }\DataTypeTok{width =}\NormalTok{ .}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{RS3_ANOVA_files/figure-latex/interaction plot-1.pdf}
+
+Here I have an interaction plot that visualises the interaction. I have
+also plotted 95\% confidence intervals around each mean.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{workingdata <-}\StringTok{ }\NormalTok{split_data }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{unite}\NormalTok{(}\StringTok{"condition"}\NormalTok{, task, presentation, }\DataTypeTok{sep =} \StringTok{"_"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{spread}\NormalTok{(condition, correctpairs)}
+\end{Highlighting}
+\end{Shaded}
+
+To compute the t-tests, I re-order the dataframe so that each condition
+is a column.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# t-test and effect size for AS and no AS in the verbal condition}
+\KeywordTok{t.test}\NormalTok{(workingdata}\OperatorTok{$}\NormalTok{NoAS_Ver, workingdata}\OperatorTok{$}\NormalTok{AS_Ver, }\DataTypeTok{paired =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Paired t-test
+## 
+## data:  workingdata$NoAS_Ver and workingdata$AS_Ver
+## t = 18.206, df = 444, p-value < 2.2e-16
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.5372949 0.6673343
+## sample estimates:
+## mean of the differences 
+##               0.6023146
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cohen.d}\NormalTok{(workingdata}\OperatorTok{$}\NormalTok{NoAS_Ver, workingdata}\OperatorTok{$}\NormalTok{AS_Ver, }\DataTypeTok{paired =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Cohen's d
+## 
+## d estimate: 1.035294 (large)
+## 95 percent confidence interval:
+##     lower     upper 
+## 0.8969765 1.1736106
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# t-test and effect size for AS and no AS in the verbal condition}
+\KeywordTok{t.test}\NormalTok{(workingdata}\OperatorTok{$}\NormalTok{NoAS_VerDemo, workingdata}\OperatorTok{$}\NormalTok{AS_VerDemo, }\DataTypeTok{paired =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Paired t-test
+## 
+## data:  workingdata$NoAS_VerDemo and workingdata$AS_VerDemo
+## t = 6.3608, df = 444, p-value = 5e-10
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.1344469 0.2546767
+## sample estimates:
+## mean of the differences 
+##               0.1945618
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cohen.d}\NormalTok{(workingdata}\OperatorTok{$}\NormalTok{NoAS_VerDemo, workingdata}\OperatorTok{$}\NormalTok{AS_VerDemo, }\DataTypeTok{paired =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Cohen's d
+## 
+## d estimate: 0.3506109 (small)
+## 95 percent confidence interval:
+##     lower     upper 
+## 0.2391533 0.4620685
+\end{verbatim}
+
+I can then compute t-tests and cohen's D effect sizes for AS and no AS
+in the verbal and and verbal + demo presentation factor levels.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{setwd}\NormalTok{(}\StringTok{"C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode"}\NormalTok{)}
+
+\KeywordTok{apa.2way.table}\NormalTok{(presentation, task, correctpairs, }\DataTypeTok{data =}\NormalTok{ split_data, }\DataTypeTok{filename =} \StringTok{"anova_means_table.doc"}\NormalTok{, }\DataTypeTok{table.number =} \DecValTok{1}\NormalTok{,}
+  \DataTypeTok{show.conf.interval =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{show.marginal.means =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## 
+## Table 1 
+## 
+## Means and standard deviations for correctpairs as a function of a 2(presentation) X 2(task) design 
+## 
+##                  M     M_95%_CI   SD
+##       task:AS                       
+##  presentation                       
+##           Ver 2.06 [2.01, 2.11] 0.54
+##       VerDemo 2.76 [2.70, 2.81] 0.57
+##                                     
+##     task:NoAS                       
+##  presentation                       
+##           Ver 2.66 [2.61, 2.72] 0.61
+##       VerDemo 2.95 [2.90, 3.00] 0.54
+## 
+## Note. M and SD represent mean and standard deviation, respectively. 
+## LL and UL indicate the lower and upper limits of the 
+## 95% confidence interval for the mean, respectively. 
+## The confidence interval is a plausible range of population means 
+## that could have created a sample mean (Cumming, 2014).
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{apa.ezANOVA.table}\NormalTok{(result_correct, }\DataTypeTok{table.title =} \StringTok{"Within subjects effects"}\NormalTok{, }\DataTypeTok{table.number =} \DecValTok{2}\NormalTok{, }\DataTypeTok{filename =} \StringTok{"anova_table.doc"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## 
+## Table 2 
+## 
+## Within subjects effects 
+## 
+##            Predictor df_num df_den   SS_num SS_den        F    p ges
+##          (Intercept)      1    444 12115.73 287.90 18684.66 .000 .95
+##                 task      1    444    70.65  99.97   313.76 .000 .11
+##         presentation      1    444   107.23  84.42   563.98 .000 .16
+##  task x presentation      1    444    18.50 100.59    81.65 .000 .03
+## 
+## Note. df_num indicates degrees of freedom numerator. df_den indicates degrees of freedom denominator. 
+## SS_num indicates sum of squares numerator. SS_den indicates sum of squares denominator. 
+## ges indicates generalized eta-squared.
+## 
+\end{verbatim}
+
+Finally, a nice little touch. The apaTables package allows me to save
+the mean and SDs from the conditions and the ANOVA tables as an APA
+formatted table in a word document. The package also includes functions
+that do this for over tests such as regressions and one-way ANOVAs.
+
+
+\end{document}
