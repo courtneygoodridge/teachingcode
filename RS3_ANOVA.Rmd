@@ -9,26 +9,14 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-<<<<<<< HEAD
+The following markdown analyses data from the RS3 in R. The results (main effects, interactions and follow up t-tests) are the same as JASP and SPSS.
+
 ```{r load packages}
 # rm(list = ls())
 library(ggplot2) # data vis
 library(tidyr) # data manipulation
 library(dplyr) # data manipulation
 library(car) # anova and levenes table
-||||||| merged common ancestors
-```{r load packages}
-# rm(list = ls())
-library(ggplot2)
-library(tidyr)
-library(dplyr)
-library(car) # anova and levenes table
-=======
-The following markdown analyses data from the RS3 in R. The results (main effects, interactions and follow up t-tests) are the same as JASP and SPSS.
-
-```{r load packages, results = 'hide', message = FALSE}
-# rm(list = ls()) # clears environment
-
 library(ggplot2) # plotting interaction plots
 library(Rmisc) # for confidence intervals on the interaction plots
 library(tidyr) # manipulating dataframes
@@ -37,9 +25,7 @@ library(ez) # allows me to compute repeated ANOVA that matches JASP output
 library(car) # allows me to use Anova() function to get summary of main effects and interactions
 library(sjstats) # computes partial eta squared effect size
 library(effsize) # computes cohen's D for follow up t-tests
->>>>>>> a8a7c41182cc7acde1d803940ca101104d344a72
 library(apaTables) # for apa tables
-<<<<<<< HEAD
 library(MBESS) # for apa tables
 library(WRS2) # for non-parametric
 library(e1071) # for skewness calculation
@@ -54,24 +40,6 @@ library(lsr) # for calculating partial eta squared
 
 # example dataframe for stack overflow
 # dput(head(modellingdata, n = 5))
-
-||||||| merged common ancestors
-library(MBESS) # for apa tables
-library(WRS2) # for non-parametric
-library(e1071) # for skewness calculation
-library(ggpubr) # for interaction plots/boxplots
-library(effsize) # for calculating effect sizes
-library(compute.es) # ancova using type 3 method
-library(multcomp) # post hoc for ancova type 3 method
-library(lmPerm)
-library(lme4)
-library(afex) # analysis of factorial experiments
-library(lsr) # for calculating partial eta squared
-
-# example dataframe for stack overflow
-# dput(head(modellingdata, n = 5))
-=======
->>>>>>> a8a7c41182cc7acde1d803940ca101104d344a72
 ```
 
 Here I am loading the packages I'll need for the analysis. I have put a note about why each one is needed. There are many ways to compute ANOVAs in R and there are many different packages you can use to do so. However I have found that the "ez" packages works best for a repeated measures design. I explain in the following markdown. 
