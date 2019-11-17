@@ -9,9 +9,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load packages}
 # rm(list = ls())
-library(ggplot2)
-library(tidyr)
-library(dplyr)
+library(ggplot2) # data vis
+library(tidyr) # data manipulation
+library(dplyr) # data manipulation
 library(car) # anova and levenes table
 library(apaTables) # for apa tables
 library(MBESS) # for apa tables
@@ -21,13 +21,14 @@ library(ggpubr) # for interaction plots/boxplots
 library(effsize) # for calculating effect sizes
 library(compute.es) # ancova using type 3 method
 library(multcomp) # post hoc for ancova type 3 method
-library(lmPerm)
-library(lme4)
+library(lmPerm) # permutation tests for linear models
+library(lme4) # modelling
 library(afex) # analysis of factorial experiments
 library(lsr) # for calculating partial eta squared
 
 # example dataframe for stack overflow
 # dput(head(modellingdata, n = 5))
+
 ```
 
 ```{r loading in data}
@@ -46,7 +47,7 @@ workingdata <- do.call(rbind.data.frame, myfiles) # convert and combine the CSV 
 ```{r demographics, normality mean scores and reshaping data}
 
 workingdata <- workingdata %>%
-  mutate(ppid = row_number())
+  dplyr::mutate(ppid = row_number())
 
 # computing histograms and normality curves for each condition
 ggplot(workingdata %>%
