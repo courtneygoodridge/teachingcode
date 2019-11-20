@@ -183,8 +183,11 @@ summary {
 
 
 <p>The following markdown analyses data from the RS3 in R. The results (main effects, interactions and follow up t-tests) are the same as JASP and SPSS.</p>
-<pre class="r"><code># rm(list = ls()) # clears environment
-
+<pre class="r"><code># rm(list = ls())
+library(ggplot2) # data vis
+library(tidyr) # data manipulation
+library(dplyr) # data manipulation
+library(car) # anova and levenes table
 library(ggplot2) # plotting interaction plots
 library(Rmisc) # for confidence intervals on the interaction plots
 library(tidyr) # manipulating dataframes
@@ -193,7 +196,21 @@ library(ez) # allows me to compute repeated ANOVA that matches JASP output
 library(car) # allows me to use Anova() function to get summary of main effects and interactions
 library(sjstats) # computes partial eta squared effect size
 library(effsize) # computes cohen's D for follow up t-tests
-library(apaTables) # for apa tables</code></pre>
+library(apaTables) # for apa tables
+library(MBESS) # for apa tables
+library(WRS2) # for non-parametric
+library(e1071) # for skewness calculation
+library(ggpubr) # for interaction plots/boxplots
+library(effsize) # for calculating effect sizes
+library(compute.es) # ancova using type 3 method
+library(multcomp) # post hoc for ancova type 3 method
+library(lmPerm) # permutation tests for linear models
+library(lme4) # modelling
+library(afex) # analysis of factorial experiments
+library(lsr) # for calculating partial eta squared
+
+# example dataframe for stack overflow
+# dput(head(modellingdata, n = 5))</code></pre>
 <p>Here I am loading the packages I’ll need for the analysis. I have put a note about why each one is needed. There are many ways to compute ANOVAs in R and there are many different packages you can use to do so. However I have found that the “ez” packages works best for a repeated measures design. I explain in the following markdown.</p>
 <pre class="r"><code># work computer working directory
 setwd(&quot;C:/Users/pscmgo/OneDrive for Business/PhD/Project/Experiment_Code/teachingcode&quot;)
@@ -205,7 +222,7 @@ workingdata &lt;- do.call(rbind.data.frame, myfiles) # convert and combine the C
 <p>Here I am grabbing the data from my working directory</p>
 <pre class="r"><code># Here I'm generating a participant ID, this will be important later
 workingdata &lt;- workingdata %&gt;%
-  mutate(ppid = row_number())
+  dplyr::mutate(ppid = row_number())
 
 # computing histograms and normality curves for each condition
 ggplot(workingdata %&gt;%

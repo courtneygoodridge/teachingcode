@@ -1,8 +1,8 @@
 ---
 title: "2x2 repeated measures ANOVA with RS3 data"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The following markdown analyses data from the RS3 in R. The results (main effects, interactions and follow up t-tests) are the same as JASP and SPSS.
 
-```{r load packages}
+```{r load packages, message = FALSE}
 # rm(list = ls())
 library(ggplot2) # data vis
 library(tidyr) # data manipulation
