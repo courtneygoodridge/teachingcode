@@ -1,0 +1,30 @@
+---
+title: "RS4 data cleaning"
+author: "Courtney Goodridge"
+date: "05/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(haven) # For read_spss function
+```
+
+```{r}
+# rm(list = ls()) # clear workspace
+setwd("C:/Users/pscmgo/Dropbox/__RS4 REGRESSION 2020_DROP HERE")
+temp = list.files(pattern = c("*.sav")) # list all SAV files in the directory
+myfiles = lapply(temp, read_spss) # read these CSV in the directory
+rs4_combined_data_raw <- do.call(rbind.data.frame, myfiles)
+
+rs4_combined_data_missing <- rs4_combined_data_raw[rowSums( is.na(rs4_combined_data_raw) ) <= 1, ] # keeps observations where only one or two na values
+
+rs4_combined_data <- rs4_combined_data_raw[complete.cases(rs4_combined_data_raw), ] # removes all rows with na values
+
+setwd("C:/Users/pscmgo/Dropbox/__RS4 REGRESSION 2020_DROP HERE") # set directory for data saving
+write_sav(rs4_combined_data, "rs4_combined_data.sav")
+write_sav(rs4_combined_data_missing, "rs4_combined_data_missing.sav")
+```
